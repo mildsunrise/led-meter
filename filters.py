@@ -121,9 +121,9 @@ class EnvelopeFollowFilter:
     before returning it to the caller.
     """
 
-    def __init__(self, cutoff_frames, release_point=0.3,
-                 high_cutoff_coefficient=1/3.0, high_stages=2,
-                 low_cutoff_coefficient=1/1.0, low_stages=1):
+    def __init__(self, cutoff_frames, release_point=0.4,
+                 high_cutoff_coefficient=0.5, high_stages=3,
+                 low_cutoff_coefficient=3.0, low_stages=2):
         """
         Initialize the filter with a cutoff frequency (`cutoff_frames` is the
         period of that frequency, measured in frames). The release point
