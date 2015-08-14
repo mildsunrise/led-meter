@@ -120,7 +120,7 @@ General options:
 
     # Create LEDP client
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.setblocking(False)
+    sock.setblocking(True)
     host = arguments["<hostname:port>"].split(":")
     if len(host) > 2:
         raise Exception("invalid host given")
@@ -185,8 +185,9 @@ General options:
         while True:
             try:
                 jack.process(jack_output, jack_input)
+                input_buffer = jack_input[0].tolist()
                 for i in xrange(buffer_size):
-                    output_buffer[i] = volume_filter.process(jack_input[0][i])
+                    output_buffer[i] = volume_filter.process(input_buffer[i])
             except jack.InputSyncError, e:
                 print "JACK: we couldn't process data in time."
 
