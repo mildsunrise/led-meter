@@ -84,7 +84,7 @@ if __name__ == "__main__":
 LED-based JACK meter.
 
 Usage:
-  led-meter.py [options] <leds> <hostname:port>
+  led-meter.py [options] <hostname:port> <leds>
   led-meter.py (-h | --help)
   led-meter.py --version
 
@@ -118,16 +118,31 @@ General options:
     from docopt import docopt
     arguments = docopt(__doc__.strip(), version="led-meter 0.1")
 
-    # Create LEDP client
+    # Create LEDP clients
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.setblocking(True)
-    host = arguments["<hostname:port>"].split(":")
-    if len(host) > 2:
+    sock.setblocking(False)
+    hosts = arguments["<hostname:port>"].split(",")
+    def create_client(host):
+        host = host.split(":")
+        if len(host) == 1:
+            return ledp.Client(sock, host[0])
+        else if len(host) == 2:
+            return ledp.Client(sock, host[0], int(host[1]))
         raise Exception("invalid host given")
-    if len(host) == 2:
-        client = ledp.Client(sock, host[0], int(host[1]))
-    else:
-        client = ledp.Client(sock, host[0])
+    clients = map(create_client, hosts)
+
+    # Parse LED specification, create multiclient
+    leds = arguments["<leds>"].split(",")
+    client = clients[0]
+    ledtuples = []
+    for led in leds:
+        led = led.split(":", 1)
+        if len(led) >= 2:
+            client = client[int(led.pop(0)) - 1]
+        ledtuples.append((client, int(led[0])))
+
+    client = ledp.MultiClient(ledtuples)
+    leds = range(nleds)
 
     # Setup JACK interface
     jack.attach(arguments["--name"])
@@ -149,7 +164,6 @@ General options:
     output_buffer = range(buffer_size)
 
     # Setup LED mapping & scheduling
-    leds = list(int(id.strip()) for id in arguments["<leds>"].split(","))
     map_range = (float(arguments["--map-start"]), float(arguments["--map-end"]))
     should_round = arguments["--round"]
     map_options = {"range": map_range, "count": len(leds), "should_round": should_round}

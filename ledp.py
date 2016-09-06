@@ -70,6 +70,38 @@ class Client:
         """
         self.send_raw(self.mask, self.values)
 
+class MultiClient:
+    """
+    This has the same interface as `Client` (except `raw_send`), but allows one
+    to join multiple clients into a single, virtual one and delegates calls
+    to them.
+    """
+
+    def __init__(self, leds):
+        """
+        Create a multiclient. `leds` is expected to be a list of (client, led)
+        tuples where `client` is a LEDP client and `led` is the id of the LED to
+        set in that client.
+        """
+        self.leds = leds
+        self.clients = set(client for client, led in leds))
+
+    def set_led(self, id, value):
+        client, led = self.leds[id]
+        client.set_led(led, value)
+
+    def release_led(self, id):
+        client, led = self.leds[id]
+        client.release_led(led)
+
+    def reset(self):
+        for client in self.clients:
+            client.reset()
+
+    def commit(self):
+        for client in self.clients:
+            client.commit()
+
 
 
 if __name__ == "__main__":
