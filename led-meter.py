@@ -10,7 +10,7 @@ import math
 
 # Simple math utilities
 
-def map(value, fr=(0, 1), to=(0, 1)):
+def nmap(value, fr=(0, 1), to=(0, 1)):
     """
     Map a value from a two-value interval into another two-value interval.
     Both intervals are `(0, 1)` by default. Values outside the `fr` interval
@@ -58,7 +58,7 @@ def map_to_leds(sample, options):
       number of LEDs instead of floored.
     """
     db = to_decibel(sample)
-    meter = clamp(map(db, fr=options["range"])) * options["count"]
+    meter = clamp(nmap(db, fr=options["range"])) * options["count"]
 
     if options["should_round"]:
         meter = round(meter)
@@ -126,7 +126,7 @@ General options:
         host = host.split(":")
         if len(host) == 1:
             return ledp.Client(sock, host[0])
-        else if len(host) == 2:
+        elif len(host) == 2:
             return ledp.Client(sock, host[0], int(host[1]))
         raise Exception("invalid host given")
     clients = map(create_client, hosts)
@@ -138,11 +138,11 @@ General options:
     for led in leds:
         led = led.split(":", 1)
         if len(led) >= 2:
-            client = client[int(led.pop(0)) - 1]
+            client = clients[int(led.pop(0)) - 1]
         ledtuples.append((client, int(led[0])))
 
     client = ledp.MultiClient(ledtuples)
-    leds = range(nleds)
+    leds = range(len(ledtuples))
 
     # Setup JACK interface
     jack.attach(arguments["--name"])

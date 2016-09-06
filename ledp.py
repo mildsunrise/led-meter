@@ -84,7 +84,7 @@ class MultiClient:
         set in that client.
         """
         self.leds = leds
-        self.clients = set(client for client, led in leds))
+        self.clients = set(client for client, led in leds)
 
     def set_led(self, id, value):
         client, led = self.leds[id]
