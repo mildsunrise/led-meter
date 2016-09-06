@@ -51,8 +51,8 @@ first).
 
 Now run led-meter:
 
-    pip install docopt jack
-    ./led-meter.py <comma-separated list of LEDs> <IP of server>
+    pip install docopt py-jack
+    ./led-meter.py <server[:port]> <comma-separated list of LEDs>
 
 Where the first argument is something like `1,8,6,11`. The more LEDs that are
 in the list, the most accurate your meter will be, but again, this can produce
@@ -89,9 +89,23 @@ How you set `-r` is more of a personal preference. Try experimenting with
 many values. It's not recommended to set `-r` below 40, though.
 
 **Protip:** Nothing stops you from having many meters, measuring different
-parts of the frequency spectrum, as I did in the demo.
+parts of the frequency spectrum, as I did in the demo. Multiple meters can
+use the same server just fine, as long as they control different LEDs.
+
+## Joining servers
+
+A single meter can use the LEDs of several servers at the same time.
+
+Suppose you have servers, `192.168.3.2` and `192.168.3.3:4901`, and you want the
+LEDs 1,3,4,5 of the first server to light up first, then the LEDs 10,11,12 of the
+second server next, creating a 7-LED meter. The command line would be:
+
+    ./led-meter.py 192.168.3.2,192.168.3.3:4901 1:1,3,4,5,2:10,11,12
 
 ## The LEDP protocol
+
+**Until I implement proper parsing (or disable packing) the following is not true,
+there are three padding bytes after version.**
 
 The protocol is very simple. The server listens on port 5021 by default.
 The client simply sends UDP datagrams with the following format:
